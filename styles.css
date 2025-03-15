@@ -1,0 +1,146 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden; /* Elimina la barra de desplazamiento */
+  height: 100vh;
+  background-image: linear-gradient(
+    174.2deg,
+    rgba(255, 244, 228, 1) 7.1%,
+    rgba(240, 246, 238, 1) 67.4%
+  );
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content:center;
+  height: 100vh;
+  width: 100vw; /* Ocupa todo el ancho */
+  background-image: linear-gradient(
+    174.2deg,
+    rgba(255, 244, 228, 1) 7.1%,
+    rgba(240, 246, 238, 1) 67.4%
+  );
+  gap: 20px; /* Espacio entre los tableros */
+}
+
+/*Título*/
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  color: black;
+  font-family: fantasy;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/*Botón de inicio*/
+.start {
+  background-color: limegreen;
+  padding: 15px 30px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  border: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.start:hover {
+  background-color: orangered;
+  color: white;
+  transform: scale();
+}
+
+/*Contenedor de cada juego */
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/*Barra superior paar Score, Player y Level */
+.scoreBoard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: black;
+  color: white;
+  width: 500px;
+  padding: 10px 5px;
+  font-size: 1.5em;
+  font-family: fantasy;
+  text-align: center;
+}
+
+/*Score a la izquierda*/
+.score {
+  flex: 1;
+  text-align: left;
+  padding-left: 10px;
+}
+
+/*Player en el centro*/
+.playerName {
+  flex: 1;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+/*Nivel a la derecha*/
+.levelDisplay {
+  flex: 1;
+  text-align: right;
+  padding-right: 10px;
+  font-size: 1.2em;
+}
+
+/*Área de juego */
+.game {
+  position: relative;
+}
+
+.gameArea {
+  background-color: black;
+  width: 500px;
+  height: 90vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.car {
+  width: 50px;
+  height: 100px;
+  position: absolute;
+  bottom: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.enemy {
+  width: 50px;
+  height: 100px;
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.line {
+  width: 10px;
+  height: 100px;
+  background: white;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
