@@ -38,22 +38,26 @@ body {
   margin-top: 10px;
 }
 
-/*Botón de inicio*/
+/* Botón de inicio al lado de la carretera izquierda */
 .start {
   background-color: limegreen;
   padding: 15px 30px;
   border-radius: 5px;
-  margin-bottom: 20px;
   font-size: 1.5em;
   cursor: pointer;
   text-align: center;
   font-weight: bold;
   border: none;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
+  top: 50%; /* Centrado verticalmente */
+  left: 5%; /* Ajustado para estar al lado de la carretera izquierda */
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.start:hover {
+  background-color: orangered;
+  color: white;
 }
 
 .start:hover {
@@ -143,4 +147,26 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+/* Botón de pausa con el mismo estilo que el botón de Start */
+.pause {
+  background-color: orange; /* Color diferente para el botón de pausa */
+  padding: 15px 30px;
+  border-radius: 5px;
+  font-size: 1.5em;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  border: none;
+  position: absolute;
+  top: 60%; /* Ubicación debajo del botón Start */
+  left: 5%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.pause:hover {
+  background-color: red;
+  color: white;
 }

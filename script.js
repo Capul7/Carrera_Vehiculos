@@ -1,47 +1,35 @@
 // DOM para el juego
 const startBtn = document.querySelector(".start"); // Botón de inicio
+const pauseBtn = document.querySelector(".pause"); // Botón de pausa
 const gameAreas = document.querySelectorAll(".gameArea"); // Áreas de juego
-const scoreBoards = document.querySelectorAll(".scoreBoard"); // Tableros de puntaje
 const scores = document.querySelectorAll(".score"); // Puntuaciones
 const levelDisplays = document.querySelectorAll(".levelDisplay"); // Niveles
 
 // Variables para los jugadores
 let players = [
-  { speed: 5, score: 0, isGamePaused: false, level: 1, start: false, x: 225, y: 600, crashed: false, color: "red" },
-  { speed: 5, score: 0, isGamePaused: false, level: 1, start: false, x: 225, y: 600, crashed: false, color: "blue" },
+  { speed: 2, score: 0, level: 1, start: false, x: 225, y: 600, crashed: false },
+  { speed: 2, score: 0, level: 1, start: false, x: 225, y: 600, crashed: false }
 ];
 
-// Teclas de los jugadores
-let keys = {
-  ArrowRight: false,
-  ArrowLeft: false,
-  a: false,
-  d: false,
-  Space: false, // Tecla de pausa
-};
+// Variables globales del juego
+let lines = [[], []]; // Líneas de carretera
+let enemies = [[], []]; // Enemigos
+let cars = []; // Autos de jugadores
+let gameLoopId; // ID del loop de animación
+let isPaused = false; // Estado de pausa
 
-// Listas de elementos del juego
-let lines = [[], []]; // Líneas de carretera para cada jugador
-let enemies = [[], []]; // Enemigos para cada jugador
-let cars = [];
+// Manejo de teclas
+let keys = { ArrowRight: false, ArrowLeft: false, a: false, d: false };
 
-// Evento para iniciar el juego
+// Eventos
 startBtn.addEventListener("click", startGame);
+pauseBtn.addEventListener("click", togglePause);
 document.addEventListener("keydown", pressOn);
 document.addEventListener("keyup", pressOff);
 
-// Manejo de teclas
 function pressOn(e) {
   e.preventDefault();
   keys[e.key] = true;
-
-  if (e.code === "Space") {
-    let allPaused = players.every(player => player.isGamePaused);
-    players.forEach(player => player.isGamePaused = !allPaused);
-    if (!allPaused) {
-      gameLoop();
-    }
-  }
 }
 
 function pressOff(e) {
@@ -49,21 +37,23 @@ function pressOff(e) {
   keys[e.key] = false;
 }
 
-// Función para iniciar el juego
+// 🔄 Función para iniciar el juego
 function startGame() {
   console.log("Juego iniciado...");
   startBtn.classList.add("hide");
+  pauseBtn.classList.remove("hide"); // Mostrar botón de pausa
+
+  cancelAnimationFrame(gameLoopId);
+  isPaused = false;
+  pauseBtn.textContent = "Pause";
 
   gameAreas.forEach((gameArea, index) => {
     gameArea.innerHTML = "";
-    players[index].start = true;
-    players[index].speed = 5;
-    players[index].score = 0;
-    players[index].level = 1;
-    players[index].crashed = false;
+    players[index] = { speed: 2, score: 0, level: 1, start: true, x: 225, y: 600, crashed: false };
     levelDisplays[index].textContent = `Level: 1`;
 
     // Crear líneas de carretera
+    lines[index] = [];
     for (let x = 0; x < 10; x++) {
       let div = document.createElement("div");
       div.classList.add("line");
@@ -73,22 +63,21 @@ function startGame() {
       lines[index].push(div);
     }
 
-    // Crear el auto del jugador
+    // Crear auto del jugador
     let car = document.createElement("div");
     car.classList.add("car");
     car.style.backgroundImage = "url('car.png')";
-    car.style.filter = index === 0 ? "hue-rotate(300deg)" : "hue-rotate(190deg)"; // Rojo y Azul
+    car.style.backgroundColor = index === 0 ? "red" : "blue";
     gameArea.appendChild(car);
     cars[index] = car;
-    players[index].x = 225;
-    players[index].y = 600;
 
     // Crear enemigos
+    enemies[index] = [];
     for (let x = 0; x < 5; x++) {
       let enemy = document.createElement("div");
       enemy.classList.add("enemy");
       enemy.style.backgroundImage = "url('car.png')";
-      enemy.style.filter = `hue-rotate(${Math.random() * 360}deg)`; // Colores aleatorios
+      enemy.style.backgroundColor = index === 0 ? "green" : "orange";
       enemy.y = (x + 1) * -300;
       enemy.style.top = `${enemy.y}px`;
       enemy.style.left = `${Math.floor(Math.random() * 350)}px`;
@@ -100,58 +89,71 @@ function startGame() {
   gameLoop();
 }
 
-// Función principal del juego
+// 🔄 Función para pausar y reanudar el juego
+function togglePause() {
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+
+  if (!isPaused) {
+    gameLoop();
+  }
+}
+
+// 🔄 Función principal del juego
 function gameLoop() {
-  if (players.every(player => player.isGamePaused || !player.start)) return;
+  if (isPaused) return; // Detiene el loop si el juego está en pausa
+
+  gameLoopId = requestAnimationFrame(gameLoop);
 
   gameAreas.forEach((gameArea, index) => {
-    if (!players[index].start || players[index].isGamePaused || players[index].crashed) return;
+    if (!players[index].start || players[index].crashed) return;
 
     moveLines(index);
     moveEnemies(index);
     movePlayer(index);
 
-    // Actualizar puntajes
+    if (players[index].speed < 5) {
+      players[index].speed += 0.005;
+    }
+
     players[index].score++;
     scores[index].textContent = `Score: ${players[index].score}`;
 
     if (players[index].score % 500 === 0) {
-      players[index].speed += 1;
-      players[index].level += 1;
+      players[index].speed += 0.5;
+      players[index].level++;
       levelDisplays[index].textContent = `Level: ${players[index].level}`;
     }
   });
-
-  requestAnimationFrame(gameLoop);
 }
 
-// Movimiento de líneas de carretera
+// 🔄 Función para mover líneas de carretera
 function moveLines(index) {
-  lines[index].forEach(item => {
-    if (item.y >= 1500) item.y -= 1500;
-    item.y += players[index].speed;
-    item.style.top = item.y + "px";
+  lines[index].forEach((line) => {
+    if (line.y >= 1500) line.y -= 1500;
+    line.y += players[index].speed;
+    line.style.top = line.y + "px";
   });
 }
 
-// Movimiento de enemigos y detección de colisión
+// 🔄 Función para mover enemigos
 function moveEnemies(index) {
-  enemies[index].forEach(item => {
-    if (isCollide(cars[index], item)) {
+  enemies[index].forEach((enemy) => {
+    if (isCollide(cars[index], enemy)) {
       console.log(`Jugador ${index + 1} colisionó!`);
       players[index].crashed = true;
       checkGameEnd();
     }
-    if (item.y >= 1500) {
-      item.y = -600;
-      item.style.left = `${Math.floor(Math.random() * 350)}px`;
+    if (enemy.y >= 1500) {
+      enemy.y = -600;
+      enemy.style.left = `${Math.floor(Math.random() * 350)}px`;
     }
-    item.y += players[index].speed;
-    item.style.top = item.y + "px";
+    enemy.y += players[index].speed;
+    enemy.style.top = enemy.y + "px";
   });
 }
 
-// Movimiento del jugador
+// 🔄 Función para mover el jugador
 function movePlayer(index) {
   let road = gameAreas[index].getBoundingClientRect();
   if (index === 0) {
@@ -164,7 +166,7 @@ function movePlayer(index) {
   cars[index].style.left = `${players[index].x}px`;
 }
 
-// Verificación de colisión
+// 🔄 Verificar colisión
 function isCollide(a, b) {
   let aRect = a.getBoundingClientRect();
   let bRect = b.getBoundingClientRect();
@@ -176,7 +178,7 @@ function isCollide(a, b) {
   );
 }
 
-// Verificar si ambos jugadores colisionaron
+// 🔄 Verificar si ambos jugadores han colisionado
 function checkGameEnd() {
   if (players.every(player => player.crashed)) {
     console.log("Juego terminado para ambos jugadores.");
